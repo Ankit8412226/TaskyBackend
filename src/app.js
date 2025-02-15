@@ -5,11 +5,14 @@ const cors = require("cors");
 const Routes = require("./routes/index");
 const dbConnect = require("./config/dbConnect");
 
+// Initialize Express app and create HTTP server
 const app = express();
 const server = http.createServer(app);
+
+// Initialize Socket.IO with CORS configuration
 const io = socketIO(server, {
   cors: {
-    origin: "*", // Allow connections from any origin (for development)
+    origin: "*",
     methods: ["GET", "POST"],
   },
 });
@@ -17,19 +20,18 @@ const io = socketIO(server, {
 // Connect to MongoDB
 dbConnect();
 
-// Middleware
+// Middleware setup
 app.use(express.json());
 app.use(cors()); // Enable CORS for HTTP requests
 app.use("/api/v1", Routes);
 
-// Set io instance in app for use in routes
+// Make io instance available throughout the application
 app.set("socketio", io);
 
-// Socket.IO connection event
+// Socket.IO connection handling
 io.on("connection", (socket) => {
-  console.log(`Client connected: ${socket.id}`); // Log the connected client socket ID
+  console.log(`Client connected: ${socket.id}`);
 
-  // Client will listen for 'disconnect' event
   socket.on("disconnect", () => {
     console.log(`Client disconnected: ${socket.id}`);
   });

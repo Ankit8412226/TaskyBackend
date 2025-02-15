@@ -8,37 +8,71 @@ const createTask = async (req, res) => {
   try {
     const { title, description, status, deadline } = req.body;
 
-    const taskId = uuidv4();
-    if (!req.user || !req.user._id) {
-      return res.status(400).json({ message: "User ID not found" });
+    // Input validation
+    if (!title || !description) {
+      return res.status(400).json({
+        message: "Title and description are required",
+      });
     }
+
+    // Validate deadline format
+    if (deadline && !Date.parse(deadline)) {
+      return res.status(400).json({
+        message: "Invalid deadline format",
+      });
+    }
+
+    // User validation
+    if (!req.user?._id) {
+      return res.status(401).json({
+        message: "User authentication required",
+      });
+    }
+
+    const taskId = uuidv4();
 
     const newTask = new Task({
       userId: req.user._id,
       taskId,
       title,
       description,
-      status,
+      status: status || "pending",
       deadline,
-      image: req.file ? req.file.filename : null,
+      image: req.file?.filename || null,
+      createdAt: new Date(),
     });
 
     const savedTask = await newTask.save();
 
-    // Emit the new task to all connected clients
+    // Get Socket.IO instance
     const io = req.app.get("socketio");
-    io.emit("newTask", savedTask);
 
-    // Log the task in the backend
+    // Emit to all clients
+    io.emit("newTask", {
+      ...savedTask.toJSON(),
+      message: "New task created",
+    });
+
+    // Emit specifically to the task creator
+    io.to(req.user._id.toString()).emit("taskCreated", {
+      success: true,
+      task: savedTask,
+    });
+
     console.log("New task created:", savedTask);
 
     res.status(201).json({
+      success: true,
       message: "Task created successfully",
       task: savedTask,
     });
   } catch (error) {
     console.error("Error creating task:", error);
-    res.status(500).json({ message: "Error creating task", error });
+    res.status(500).json({
+      success: false,
+      message: "Error creating task",
+      error: error.message,
+    });
   }
 };
 
