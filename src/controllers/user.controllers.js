@@ -9,6 +9,8 @@ const JWT_SECRET = process.env.JWT_SECRET || "your_jwt_secret";
 const createUser = async (req, res, next) => {
   const { email, password, name } = req.body;
 
+  console.log(req.body, "created");
+
   try {
     const existingUser = await User.findOne({ email });
     if (existingUser) {
