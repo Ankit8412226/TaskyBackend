@@ -3,7 +3,6 @@ const { v4: uuidv4 } = require("uuid");
 const PDFDocument = require("pdfkit");
 const fs = require("fs");
 const path = require("path");
-
 const createTask = async (req, res) => {
   try {
     const { title, description, status, deadline } = req.body;
@@ -43,21 +42,6 @@ const createTask = async (req, res) => {
     });
 
     const savedTask = await newTask.save();
-
-    // Get Socket.IO instance
-    const io = req.app.get("socketio");
-
-    // Emit to all clients
-    io.emit("newTask", {
-      ...savedTask.toJSON(),
-      message: "New task created",
-    });
-
-    // Emit specifically to the task creator
-    io.to(req.user._id.toString()).emit("taskCreated", {
-      success: true,
-      task: savedTask,
-    });
 
     console.log("New task created:", savedTask);
 
