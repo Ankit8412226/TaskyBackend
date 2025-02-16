@@ -20,9 +20,9 @@ app.use(express.json());
 // Enable CORS for localhost:5173 (Vite)
 app.use(
   cors({
-    origin: "http://localhost:5173", // Allow requests from frontend
+    origin: ["http://localhost:3000", "https://taskybackend-nwza.onrender.com"], // Allow frontend & backend URLs
     methods: ["GET", "POST", "PUT", "DELETE"],
-    credentials: true, // Allow cookies & authentication headers
+    credentials: true, // Allow cookies and auth headers
   })
 );
 
