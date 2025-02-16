@@ -17,27 +17,30 @@ dbConnect();
 // ✅ Allow All CORS Requests (Fully Open)
 app.use(
   cors({
-    origin: "*", // 🔥 Allow requests from any origin
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], // Allow all HTTP methods
-    allowedHeaders: ["Content-Type", "Authorization"], // Allow all headers
-    credentials: false, // 🔥 Disable credentials (Cookies/Authentication headers)
+    origin: "*", // 🔥 Allow any frontend to access
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], // Allow all methods
+    allowedHeaders: ["Content-Type", "Authorization"], // Allow authentication headers
+    credentials: false, // Disable credentials (cookies)
   })
 );
 
-// ✅ Handle Preflight Requests (Important for CORS)
-app.options("*", cors());
+// ✅ Handle Preflight Requests (Fix for OPTIONS requests)
+app.options("*", (req, res) => {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.sendStatus(204);
+});
 
-// Middleware setup
-app.use(express.json());
-
-// ✅ Set Headers Globally for Full CORS Support
+// ✅ Ensure Headers are Set for Every Response
 app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "*"); // 🔥 Allow all origins
+  res.header("Access-Control-Allow-Origin", "*"); // Allow all origins
   res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
   res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
   next();
 });
 
+app.use(express.json());
 app.use("/api/v1", Routes);
 
 // Start the server
