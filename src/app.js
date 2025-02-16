@@ -19,17 +19,17 @@ dbConnect();
 dbConnect();
 
 // Middleware
+const corsOptions = {
+  origin: "*",
+  methods: ["GET", "POST", "PUT", "DELETE"],
+};
 app.use(express.json());
+app.use(cors(corsOptions));
 
 app.use("/api/v1", Routes);
 
-const corsOptions = {
-  origin: "*", // Allow connections from any origin
-  methods: ["GET", "POST", "PUT", "DELETE"],
-};
-
 // Middleware
-app.use(cors(corsOptions));
+
 // Start the server
 const port = process.env.PORT || 3000;
 server.listen(port, () => {
