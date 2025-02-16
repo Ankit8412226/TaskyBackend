@@ -16,7 +16,14 @@ dbConnect();
 
 // Middleware setup
 app.use(express.json());
-app.use(cors()); // Enable CORS for HTTP requests
+app.use(
+  cors({
+    origin: "http://localhost:5173", // Allow only localhost:5173
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true, // Allow cookies and credentials
+  })
+);
+
 app.use("/api/v1", Routes);
 
 // Start the server
