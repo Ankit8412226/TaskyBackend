@@ -1,6 +1,6 @@
 const express = require("express");
 const http = require("http");
-const cors = require("cors"); // Import cors
+const cors = require("cors");
 const Routes = require("./routes/index");
 const dbConnect = require("./config/dbConnect");
 const path = require("path");
@@ -14,18 +14,29 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 // Connect to MongoDB
 dbConnect();
 
+// ✅ Allow All CORS Requests (Fully Open)
+app.use(
+  cors({
+    origin: "*", // 🔥 Allow requests from any origin
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], // Allow all HTTP methods
+    allowedHeaders: ["Content-Type", "Authorization"], // Allow all headers
+    credentials: false, // 🔥 Disable credentials (Cookies/Authentication headers)
+  })
+);
+
+// ✅ Handle Preflight Requests (Important for CORS)
+app.options("*", cors());
+
 // Middleware setup
 app.use(express.json());
 
-// Enable CORS for localhost:5173 (Vite)
-app.use(
-  cors({
-    origin: ["http://localhost:5173", "https://your-frontend-url.com"], // Allow frontend & deployed site
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-    credentials: true, // Allow cookies & auth headers
-  })
-);
+// ✅ Set Headers Globally for Full CORS Support
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "*"); // 🔥 Allow all origins
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  next();
+});
 
 app.use("/api/v1", Routes);
 
