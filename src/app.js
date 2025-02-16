@@ -8,6 +8,8 @@ const dbConnect = require("./config/dbConnect");
 const app = express();
 const server = http.createServer(app);
 
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
 // Connect to MongoDB
 dbConnect();
 
